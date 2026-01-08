@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legionários - Gerador de Personagens</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+<body>
+    <div class="container">
+        <!-- Cabeçalho Hero -->
+        <header class="header">
+            <div class="logo-container">
+                <div class="logo-icon">⚔️</div>
+                <h1 class="logo-text">LEGIONÁRIOS</h1>
+                <div class="logo-subtitle">Gerador de Heróis</div>
+            </div>
+            <div class="header-ornament">
+                <div class="sword-decoration">🗡️</div>
+                <div class="sword-decoration">🛡️</div>
+                <div class="sword-decoration">⚔️</div>
+            </div>
+        </header>
+
+        <!-- Cartão de Personagem -->
+        <main class="main-content">
+            <div class="character-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-scroll"></i> FICHA DO PERSONAGEM</h2>
+                    <div class="character-id" id="characterId">ID: LGN-0001</div>
+                </div>
+                
+                <div class="character-stats">
+                    <!-- Raça -->
+                    <div class="stat-box" id="raceBox">
+                        <div class="stat-icon">👤</div>
+                        <div class="stat-content">
+                            <h3>RAÇA</h3>
+                            <div class="stat-value" id="raceValue">Aguardando sorteio...</div>
+                            <div class="stat-dice" id="raceDice">Dado: -</div>
+                        </div>
+                        <button class="stat-btn" onclick="generateRace()" id="raceBtn">
+                            <i class="fas fa-dice-d20"></i> Sortear
+                        </button>
+                    </div>
+
+                    <!-- Linhagem -->
+                    <div class="stat-box" id="bloodBox">
+                        <div class="stat-icon">💉</div>
+                        <div class="stat-content">
+                            <h3>LINHAGEM SANGUÍNEA</h3>
+                            <div class="stat-value" id="bloodValue">Aguardando sorteio...</div>
+                            <div class="stat-dice" id="bloodDice">Dado: -</div>
+                        </div>
+                        <button class="stat-btn" onclick="generateBlood()" id="bloodBtn">
+                            <i class="fas fa-dice-d20"></i> Sortear
+                        </button>
+                    </div>
+
+                    <!-- Poder -->
+                    <div class="stat-box" id="powerBox">
+                        <div class="stat-icon">🔮</div>
+                        <div class="stat-content">
+                            <h3>PODER ARCANO</h3>
+                            <div class="stat-value" id="powerValue">Aguardando sorteio...</div>
+                            <div class="stat-dice" id="powerDice">Dado: -</div>
+                        </div>
+                        <button class="stat-btn" onclick="generatePower()" id="powerBtn">
+                            <i class="fas fa-dice-d20"></i> Sortear
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Controles -->
+                <div class="controls">
+                    <button class="control-btn gold" onclick="generateAll()">
+                        <i class="fas fa-crown"></i> CRIAR PERSONAGEM COMPLETO
+                    </button>
+                    <button class="control-btn dark" onclick="saveCharacter()">
+                        <i class="fas fa-save"></i> SALVAR PERSONAGEM
+                    </button>
+                    <button class="control-btn reset" onclick="resetAll()">
+                        <i class="fas fa-redo"></i> REINICIAR TUDO
+                    </button>
+                </div>
+
+                <!-- Histórico -->
+                <div class="history-section">
+                    <h3><i class="fas fa-history"></i> HISTÓRICO DE SORTEIOS</h3>
+                    <div class="history-list" id="historyList">
+                        <!-- Itens do histórico serão inseridos aqui -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar - Instruções -->
+            <div class="sidebar">
+                <div class="info-card">
+                    <h3><i class="fas fa-info-circle"></i> COMO USAR</h3>
+                    <ul>
+                        <li>Clique em <span class="highlight">"Sortear"</span> em cada categoria</li>
+                        <li>Ou use <span class="highlight">"Criar Personagem Completo"</span></li>
+                        <li>Salve seus personagens favoritos</li>
+                        <li>Compartilhe com amigos!</li>
+                    </ul>
+                </div>
+
+                <div class="info-card">
+                    <h3><i class="fas fa-book"></i> SOBRE AS RAÇAS</h3>
+                    <div class="race-info">
+                        <p><strong>Humano</strong> - 55% de chance</p>
+                        <p><strong>Raças Especiais</strong> - 22% de chance</p>
+                        <p><strong>Semi-deus/Arcanjo</strong> - 22% de chance</p>
+                    </div>
+                </div>
+
+                <div class="share-section">
+                    <h3><i class="fas fa-share-alt"></i> COMPARTILHAR</h3>
+                    <div class="share-buttons">
+                        <button class="share-btn" onclick="shareCharacter()">
+                            <i class="fas fa-link"></i> Gerar Link
+                        </button>
+                        <button class="share-btn" onclick="copyCharacter()">
+                            <i class="far fa-copy"></i> Copiar Ficha
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Rodapé -->
+        <footer class="footer">
+            <div class="footer-content">
+                <p>✨ Criado para o universo de <strong>"Legionários"</strong> ✨</p>
+                <p class="footer-note">
+                    <i class="fas fa-mobile-alt"></i> Totalmente compatível com celulares |
+                    <i class="fas fa-bolt"></i> Funciona offline
+                </p>
+            </div>
+            <div class="footer-ornament">⚔️</div>
+        </footer>
+
+        <!-- Notificação -->
+        <div class="notification" id="notification">
+            <span id="notificationText"></span>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+</body>
+</html>
