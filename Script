@@ -1,0 +1,453 @@
+// Dados do jogo
+let currentCharacter = {
+    race: null,
+    blood: null,
+    power: null,
+    raceDice: null,
+    bloodDice: null,
+    powerDice: null,
+    id: generateCharacterId()
+};
+
+let history = [];
+let rollCount = 0;
+
+// Elementos DOM
+const raceValue = document.getElementById('raceValue');
+const bloodValue = document.getElementById('bloodValue');
+const powerValue = document.getElementById('powerValue');
+const raceDice = document.getElementById('raceDice');
+const bloodDice = document.getElementById('bloodDice');
+const powerDice = document.getElementById('powerDice');
+const characterId = document.getElementById('characterId');
+const historyList = document.getElementById('historyList');
+const raceBox = document.getElementById('raceBox');
+const bloodBox = document.getElementById('bloodBox');
+const powerBox = document.getElementById('powerBox');
+
+// Sons (usando Web Audio API)
+function playDiceSound() {
+    try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.value = 300 + Math.random() * 200;
+        oscillator.type = 'sine';
+        
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+        
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.5);
+    } catch (e) {
+        console.log("Áudio não suportado ou bloqueado");
+    }
+}
+
+// Gerar ID único
+function generateCharacterId() {
+    const timestamp = Date.now().toString().slice(-6);
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    return `LGN-${timestamp}${random}`;
+}
+
+// Notificações
+function showNotification(message, duration = 3000) {
+    const notification = document.getElementById('notification');
+    const notificationText = document.getElementById('notificationText');
+    
+    notificationText.textContent = message;
+    notification.classList.add('show');
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, duration);
+}
+
+// Efeito visual de rolagem
+function animateRoll(element) {
+    element.classList.add('loading');
+    setTimeout(() => {
+        element.classList.remove('loading');
+    }, 500);
+}
+
+// Função para rolar dado (1-18)
+function rollDice() {
+    return Math.floor(Math.random() * 18) + 1;
+}
+
+// Gerar Raça
+function generateRace() {
+    playDiceSound();
+    
+    const dice = rollDice();
+    animateRoll(raceBox);
+    
+    setTimeout(() => {
+        let result;
+        
+        if (dice >= 1 && dice <= 10) {
+            result = "Humano";
+        } else if (dice >= 11 && dice <= 14) {
+            result = "Gosmento, Ligrimiano ou Lá Douriano (Escolha)";
+        } else {
+            result = "Semi-deus ou Arcanjo (Escolha)";
+        }
+        
+        currentCharacter.race = result;
+        currentCharacter.raceDice = dice;
+        
+        raceValue.textContent = result;
+        raceDice.textContent = `Dado: ${dice}`;
+        raceBox.classList.add('active');
+        
+        addToHistory(`🎲 Raça sorteada: ${result} (${dice}/18)`);
+        rollCount++;
+        
+        showNotification(`🎭 Raça determinada: ${result.split(' ')[0]}`);
+    }, 500);
+}
+
+// Gerar Linhagem Sanguínea
+function generateBlood() {
+    playDiceSound();
+    
+    const dice = rollDice();
+    animateRoll(bloodBox);
+    
+    setTimeout(() => {
+        let result;
+        
+        if (dice >= 1 && dice <= 10) {
+            result = "Plebeu";
+        } else if (dice >= 11 && dice <= 16) {
+            result = "Real";
+        } else {
+            result = "Descendente do 'PAI'";
+        }
+        
+        currentCharacter.blood = result;
+        currentCharacter.bloodDice = dice;
+        
+        bloodValue.textContent = result;
+        bloodDice.textContent = `Dado: ${dice}`;
+        bloodBox.classList.add('active');
+        
+        addToHistory(`💉 Linhagem sorteada: ${result} (${dice}/18)`);
+        rollCount++;
+        
+        showNotification(`🩸 Linhagem: ${result}`);
+    }, 500);
+}
+
+// Gerar Poder
+function generatePower() {
+    playDiceSound();
+    
+    const dice = rollDice();
+    animateRoll(powerBox);
+    
+    setTimeout(() => {
+        let result;
+        
+        if (dice >= 1 && dice <= 10) {
+            result = "Elemental";
+        } else if (dice >= 11 && dice <= 15) {
+            result = "Elemental + Subelemento";
+        } else {
+            result = "Magia Arcana (Tempo/Portal/Trevas/Luz/Adaptação/Cópia)";
+        }
+        
+        currentCharacter.power = result;
+        currentCharacter.powerDice = dice;
+        
+        powerValue.textContent = result;
+        powerDice.textContent = `Dado: ${dice}`;
+        powerBox.classList.add('active');
+        
+        addToHistory(`🔮 Poder sorteado: ${result.split(' ')[0]} (${dice}/18)`);
+        rollCount++;
+        
+        showNotification(`✨ Poder: ${result.split(' ')[0]}`);
+    }, 500);
+}
+
+// Gerar tudo de uma vez
+function generateAll() {
+    playDiceSound();
+    
+    // Animar todos os elementos
+    animateRoll(raceBox);
+    animateRoll(bloodBox);
+    animateRoll(powerBox);
+    
+    // Desabilitar botões durante a animação
+    disableButtons(true);
+    
+    setTimeout(() => {
+        // Gerar todos os valores
+        generateRace();
+        setTimeout(() => {
+            generateBlood();
+            setTimeout(() => {
+                generatePower();
+                
+                // Atualizar ID
+                currentCharacter.id = generateCharacterId();
+                characterId.textContent = `ID: ${currentCharacter.id}`;
+                
+                // Reabilitar botões
+                disableButtons(false);
+                
+                showNotification(`🎭 Personagem completo criado! ID: ${currentCharacter.id}`);
+                addToHistory(`🌟 PERSONAGEM COMPLETO CRIADO - ${currentCharacter.id}`);
+            }, 600);
+        }, 600);
+    }, 600);
+}
+
+// Desabilitar/Habilitar botões
+function disableButtons(disable) {
+    const buttons = document.querySelectorAll('.stat-btn, .control-btn');
+    buttons.forEach(btn => {
+        btn.disabled = disable;
+        btn.style.opacity = disable ? '0.5' : '1';
+        btn.style.cursor = disable ? 'not-allowed' : 'pointer';
+    });
+}
+
+// Adicionar ao histórico
+function addToHistory(text) {
+    const timestamp = new Date().toLocaleTimeString();
+    const historyItem = document.createElement('div');
+    historyItem.className = 'history-item';
+    historyItem.innerHTML = `<strong>${timestamp}</strong> - ${text}`;
+    
+    historyList.prepend(historyItem);
+    history.unshift({ text, timestamp });
+    
+    // Limitar histórico a 10 itens
+    if (historyList.children.length > 10) {
+        historyList.removeChild(historyList.lastChild);
+        history.pop();
+    }
+}
+
+// Salvar personagem
+function saveCharacter() {
+    if (!currentCharacter.race || !currentCharacter.blood || !currentCharacter.power) {
+        showNotification('⚠️ Complete o personagem antes de salvar!', 4000);
+        return;
+    }
+    
+    const characterData = {
+        ...currentCharacter,
+        savedAt: new Date().toISOString(),
+        rollCount: rollCount
+    };
+    
+    // Salvar no localStorage
+    let savedCharacters = JSON.parse(localStorage.getItem('legionariosCharacters') || '[]');
+    savedCharacters.push(characterData);
+    localStorage.setItem('legionariosCharacters', JSON.stringify(savedCharacters));
+    
+    // Criar texto para download
+    const text = `LEGIONÁRIOS - FICHA DE PERSONAGEM
+=========================================
+ID: ${currentCharacter.id}
+Data: ${new Date().toLocaleString()}
+
+🏛️ RAÇA: ${currentCharacter.race} (Dado: ${currentCharacter.raceDice})
+💉 LINHAGEM: ${currentCharacter.blood} (Dado: ${currentCharacter.bloodDice})
+🔮 PODER: ${currentCharacter.power} (Dado: ${currentCharacter.powerDice})
+
+Total de rolagens: ${rollCount}
+=========================================
+Gerado pelo Sistema Legionários ⚔️`;
+
+    // Download do arquivo
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `legionarios_${currentCharacter.id}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showNotification('💾 Personagem salvo com sucesso!');
+}
+
+// Compartilhar personagem
+function shareCharacter() {
+    if (!currentCharacter.race || !currentCharacter.blood || !currentCharacter.power) {
+        showNotification('Crie um personagem primeiro!');
+        return;
+    }
+    
+    const shareText = `🎭 Meu personagem Legionários:
+ID: ${currentCharacter.id}
+Raça: ${currentCharacter.race}
+Linhagem: ${currentCharacter.blood}
+Poder: ${currentCharacter.power}
+
+Crie o seu em: ${window.location.href}`;
+    
+    if (navigator.share) {
+        navigator.share({
+            title: 'Meu Personagem Legionários',
+            text: shareText,
+            url: window.location.href
+        });
+    } else {
+        navigator.clipboard.writeText(shareText).then(() => {
+            showNotification('📋 Link copiado para a área de transferência!');
+        });
+    }
+}
+
+// Copiar ficha
+function copyCharacter() {
+    if (!currentCharacter.race || !currentCharacter.blood || !currentCharacter.power) {
+        showNotification('Crie um personagem primeiro!');
+        return;
+    }
+    
+    const text = `LEGIONÁRIOS - ${currentCharacter.id}
+Raça: ${currentCharacter.race}
+Linhagem: ${currentCharacter.blood}
+Poder: ${currentCharacter.power}`;
+    
+    navigator.clipboard.writeText(text).then(() => {
+        showNotification('📋 Ficha copiada!');
+    });
+}
+
+// Reiniciar tudo
+function resetAll() {
+    if (confirm('Tem certeza que deseja reiniciar tudo?')) {
+        currentCharacter = {
+            race: null,
+            blood: null,
+            power: null,
+            raceDice: null,
+            bloodDice: null,
+            powerDice: null,
+            id: generateCharacterId()
+        };
+        
+        raceValue.textContent = 'Aguardando sorteio...';
+        bloodValue.textContent = 'Aguardando sorteio...';
+        powerValue.textContent = 'Aguardando sorteio...';
+        
+        raceDice.textContent = 'Dado: -';
+        bloodDice.textContent = 'Dado: -';
+        powerDice.textContent = 'Dado: -';
+        
+        characterId.textContent = `ID: ${currentCharacter.id}`;
+        
+        raceBox.classList.remove('active');
+        bloodBox.classList.remove('active');
+        powerBox.classList.remove('active');
+        
+        historyList.innerHTML = '';
+        history = [];
+        rollCount = 0;
+        
+        showNotification('🔄 Tudo reiniciado!');
+    }
+}
+
+// Atalhos de teclado
+document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey || e.metaKey) {
+        switch(e.key.toLowerCase()) {
+            case '1':
+                e.preventDefault();
+                generateRace();
+                break;
+            case '2':
+                e.preventDefault();
+                generateBlood();
+                break;
+            case '3':
+                e.preventDefault();
+                generatePower();
+                break;
+            case 'a':
+                e.preventDefault();
+                generateAll();
+                break;
+            case 's':
+                e.preventDefault();
+                saveCharacter();
+                break;
+            case 'r':
+                e.preventDefault();
+                resetAll();
+                break;
+        }
+    }
+    
+    // Tecla espaço para gerar tudo
+    if (e.code === 'Space' && e.target === document.body) {
+        e.preventDefault();
+        generateAll();
+    }
+});
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', () => {
+    characterId.textContent = `ID: ${currentCharacter.id}`;
+    
+    // Adicionar instrução inicial ao histórico
+    addToHistory('🚀 Sistema Legionários iniciado. Comece a criar!');
+    
+    // Mostrar dicas
+    setTimeout(() => {
+        showNotification('✨ Dica: Use Ctrl+1, Ctrl+2, Ctrl+3 para sortear rapidamente!');
+    }, 2000);
+});
+
+// Suporte offline
+window.addEventListener('online', () => {
+    showNotification('🌐 Conectado à internet');
+});
+
+window.addEventListener('offline', () => {
+    showNotification('📴 Modo offline ativado - tudo funcionando!');
+});
+
+// Instalar como PWA (Progressive Web App)
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(error => {
+            console.log('Service Worker falhou:', error);
+        });
+    });
+}
+
+// Instalar prompt
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    
+    setTimeout(() => {
+        if (confirm('Deseja instalar o Gerador Legionários no seu celular para acesso rápido?')) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    showNotification('📱 App instalado com sucesso!');
+                }
+                deferredPrompt = null;
+            });
+        }
+    }, 10000);
+});
